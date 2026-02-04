@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meine Seite</title>
+
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #60a5fa;
+      --accent2: #34d399;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(circle at 20% 20%, #1f2937, var(--bg));
+      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .card {
+      width: min(720px, 100%);
+      background: rgba(17, 24, 39, 0.85);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+      letter-spacing: 0.2px;
+    }
+
+    p {
+      color: var(--muted);
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      outline: none;
+    }
+
+    input:focus {
+      border-color: rgba(96,165,250,0.6);
+      box-shadow: 0 0 0 4px rgba(96,165,250,0.12);
+    }
+
+    button {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #0b1020;
+      transition: transform 0.08s ease, filter 0.2s ease;
+      white-space: nowrap;
+    }
+
+    button:hover { filter: brightness(1.05); }
+    button:active { transform: scale(0.98); }
+
+    .list {
+      margin-top: 18px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .item small {
+      color: var(--muted);
+    }
+
+    .pill {
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(96,165,250,0.12);
+      border: 1px solid rgba(96,165,250,0.25);
+      color: #bfdbfe;
+    }
+
+    .footer {
+      margin-top: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .hint {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="card">
+    <h1>Mini To-Do Liste ✨</h1>
+    <p>Alles in einer Datei: HTML + CSS + JavaScript. (Kein Framework, einfach clean.)</p>
+
+    <div class="row">
+      <input id="todoInput" type="text" placeholder="Neue Aufgabe eingeben…" />
+      <button id="addBtn">Hinzufügen</button>
+    </div>
+
+    <section class="list" id="todoList"></section>
+
+    <div class="footer">
+      <span class="hint">Tipp: Enter drücken zum Hinzufügen</span>
+      <span class="pill" id="countPill">0 Aufgaben</span>
+    </div>
+  </main>
+
+  <script>
+    const input = document.getElementById("todoInput");
+    const addBtn = document.getElementById("addBtn");
+    const list = document.getElementById("todoList");
+    const countPill = document.getElementById("countPill");
+
+    let todos = [];
+
+    function render() {
+      list.innerHTML = "";
+
+      todos.forEach((text, index) => {
+        const item = document.createElement("div");
+        item.className = "item";
+
+        const left = document.createElement("div");
+        left.innerHTML = `<strong>${escapeHtml(text)}</strong><br><small>Aufgabe #${index + 1}</small>`;
+
+        const del = document.createElement("button");
+        del.textContent = "Löschen";
+        del.style.background = "rgba(255,255,255,0.08)";
+        del.style.color = "#e5e7eb";
+        del.style.border = "1px solid rgba(255,255,255,0.10)";
+
+        del.addEventListener("click", () => {
+          todos.splice(index, 1);
+          render();
+        });
+
+        item.appendChild(left);
+        item.appendChild(del);
+        list.appendChild(item);
+      });
+
+      countPill.textContent = `${todos.length} Aufgabe${todos.length === 1 ? "" : "n"}`;
+    }
+
+    function addTodo() {
+      const value = input.value.trim();
+      if (!value) return;
+
+      todos.unshift(value);
+      input.value = "";
+      render();
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    addBtn.addEventListener("click", addTodo);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") addTodo();
+    });
+
+    render();
+  </script>
+</body>
+</html>
+
